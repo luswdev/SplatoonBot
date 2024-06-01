@@ -171,7 +171,7 @@ class Splatoon3Ink {
         }
 
         let map
-        if (_type === this.salmonType.bigRun) {
+        if (_type === this.salmonType.bigRun && _set.setting.coopStage.name !== 'Multiple Sites') {
             map = database.getListKey('VSStage', _set.setting.coopStage.name)
         } else {
             map = database.getListKey('CoopStage', _set.setting.coopStage.name)

@@ -52,7 +52,7 @@ class CmdSalmonRun extends CmdBase {
 
     getImage (_rotation) {
         let map, thumb
-        if (_rotation.bigRun) {
+        if (_rotation.bigRun && _rotation.map !== 'Random') {
             map = database.getListObject('VSStage', _rotation.map)
             thumb = findImg('stage', _rotation.map)
         } else {
