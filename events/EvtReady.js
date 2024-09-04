@@ -5,7 +5,7 @@ const child_process = require('child_process')
 const { ActivityType, Collection } = require('discord.js')
 const EvtBase = require('events/EvtBase')
 
-const { bot, rotation_api } = require('config.json')
+const { bot, hook, hook_github, rotation_api } = require('config.json')
 
 const Hook = require('hook/Hook.js')
 
@@ -26,8 +26,10 @@ class EvtReady extends EvtBase {
 
         _client.user.setActivity('Splatoon 3', { type: ActivityType.Playing })
 
-        _client.hooks = new Hook()
-        _client.hooks.connect()
+        if (hook && hook_github) {
+            _client.hooks = new Hook()
+            _client.hooks.connect()
+        }
 
         // run splatoon3.ink scheduler in child thread
         child_process.fork('workers/WkrSplatoon3Ink.js')
@@ -35,18 +37,22 @@ class EvtReady extends EvtBase {
         _client.commands = new Collection()
         _client.commands = await _client.application.commands.fetch()
 
-        _client.startTimestamp = Date.now()
-        _client.botInfo = new BotInfo(_client)
+        if (bot.debug) {
+            _client.startTimestamp = Date.now()
+            _client.botInfo = new BotInfo(_client)
 
-        _client.botInfo.update()
-        _client.botInfo.schedule()
+            _client.botInfo.update()
+            _client.botInfo.schedule()
 
-        _client.analytics = new Analytics(_client, bot.debug)
-        _client.analytics.report()
-        _client.analytics.schedule()
+            _client.analytics = new Analytics(_client, bot.debug)
+            _client.analytics.report()
+            _client.analytics.schedule()
+        }
 
-        _client.reporter = new RotationAncmt(_client, rotation_api.announcement)
-        _client.reporter.schedule()
+        if (rotation_api.announcement) {
+            _client.reporter = new RotationAncmt(_client, rotation_api.announcement)
+            _client.reporter.schedule()
+        }
 
         log.write('bot ready')
     }

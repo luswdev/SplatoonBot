@@ -7,6 +7,11 @@ const { log } = require('utils/Log.js')
 class ConnDB {
 
     constructor (_config) {
+        if (!_config) {
+            this.skip = true
+            return
+        }
+
         this.conn = mysql.createPool(_config)
         this.cmdTable = _config.cmd_table
         this.voteTable = _config.vote_table
@@ -14,6 +19,10 @@ class ConnDB {
     }
 
     saveInteraction (_cmd, _user, _interaction) {
+        if (this.skip) {
+            return
+        }
+
         let query = this.conn.query(`INSERT INTO ${this.cmdTable} (user_id, command, interaction) VALUES (?, ?, ?)`, [_user, _cmd, _interaction])
         query
             .on('error', (err) => {
@@ -25,6 +34,10 @@ class ConnDB {
     }
 
     checkUser (_user, _from) {
+        if (this.skip) {
+            return
+        }
+
         return new Promise( (resolve, reject) => {
             let find = this.conn.query(`SELECT ${_from} FROM ${this.voteTable} WHERE user_id=(?)`, [_user], (err, ret) => {
                 if (err) {
@@ -51,6 +64,10 @@ class ConnDB {
     }
 
     async voteHistory (_user, _from) {
+        if (this.skip) {
+            return
+        }
+
         const ret = await this.checkUser(_user, _from)
 
         log.write('check user:', ret)
@@ -71,6 +88,10 @@ class ConnDB {
     }
 
     getCmdUsage(_cmd = '', _total = false) {
+        if (this.skip) {
+            return
+        }
+
         return new Promise( (resolve, reject) => {
             let query
             if (_cmd == '' && _total) {
@@ -99,6 +120,10 @@ class ConnDB {
     }
 
     saveBotInfo (_servers, _users) {
+        if (this.skip) {
+            return
+        }
+
         let query = this.conn.query(`INSERT INTO ${this.infoTable} (servers, users) VALUES (?, ?)`, [_servers, _users])
         query
             .on('error', (err) => {
